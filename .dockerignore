@@ -1,0 +1,22 @@
+# Essenciais
+node_modules/
+dist/
+.angular/
+docker-compose.yml
+
+# Ambiente
+.env
+.env.*
+
+# Logs e cache
+*.log
+.npm/
+.yarn/
+
+# IDEs
+.vscode/
+.idea/
+
+# Sistema
+.DS_Store
+Thumbs.db
