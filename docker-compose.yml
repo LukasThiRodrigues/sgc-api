@@ -1,20 +1,45 @@
 version: '3.8'
 
 services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - DB_HOST=mysql-db
+      - DB_PORT=3306
+      - DB_USER=root
+      - DB_PASSWORD=rootroot
+      - DB_NAME=SGC
+      - CORS_ORIGIN=http://localhost:4200
+    depends_on:
+      - mysql-db
+    volumes:
+      - .:/app
+      - /app/node_modules
+    restart: unless-stopped
+    env_file:
+      - .env
+
   mysql-db:
     image: mysql:8.0
-    container_name: mysql-sgc
+    container_name: sgc-mysql
     environment:
       MYSQL_ROOT_PASSWORD: rootroot
       MYSQL_DATABASE: SGC
+      MYSQL_USER: app_user
+      MYSQL_PASSWORD: app_password
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
     command: >
       --character-set-server=utf8mb4
       --collation-server=utf8mb4_unicode_ci
       --default-authentication-plugin=mysql_native_password
+    restart: unless-stopped
 
 volumes:
   mysql_data:
