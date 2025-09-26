@@ -21,4 +21,7 @@ export class User {
     @MinLength(6)
     password: string;
 
+    @Column({ nullable: true })
+    supplierId: number;
+
 }

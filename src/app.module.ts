@@ -8,6 +8,8 @@ import { UserModule } from './user/user.module';
 import { User } from './user/user.entity';
 import { ItemModule } from './item/item.module';
 import { Item } from './item/item.entity';
+import { Supplier } from './supplier/supplier.entity';
+import { SupplierModule } from './supplier/supplier.module';
 
 @Module({
   imports: [
@@ -23,14 +25,15 @@ import { Item } from './item/item.entity';
         username: configService.get('DB_USER', 'root'),
         password: configService.get('DB_PASSWORD', 'rootroot'),
         database: configService.get('DB_NAME', 'SGC'),
-        entities: [User, Item],
+        entities: [User, Item, Supplier],
         synchronize: true,
       }),
       inject: [ConfigService],
     }),
     AuthModule,
     UserModule,
-    ItemModule
+    ItemModule,
+    SupplierModule,
   ],
   controllers: [AppController],
   providers: [AppService],
