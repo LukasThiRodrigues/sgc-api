@@ -5,18 +5,27 @@ import * as bcrypt from 'bcryptjs';
 import { User } from './user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { Supplier, SupplierStatus } from 'src/supplier/supplier.entity';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    @InjectRepository(Supplier)
+    private supplierRepository: Repository<Supplier>,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
     const existingUser = await this.findByEmail(createUserDto.email);
     if (existingUser) {
       throw new BadRequestException('Email já cadastrado');
+    }
+
+    const supplier = await this.findContactSupplier(createUserDto.email);
+    if (supplier) {
+      createUserDto.supplierId = supplier.id;
+      await this.supplierRepository.update(supplier.id, { status: SupplierStatus.Active });
     }
 
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
@@ -52,6 +61,10 @@ export class UserService {
       throw new NotFoundException('Usuário não encontrado');
     }
     return user;
+  }
+
+  async findContactSupplier(email: string): Promise<Supplier | null> {
+    return this.supplierRepository.findOne({ where: { contactEmail: email }});
   }
 
   async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
