@@ -10,6 +10,10 @@ import { ItemModule } from './item/item.module';
 import { Item } from './item/item.entity';
 import { Supplier } from './supplier/supplier.entity';
 import { SupplierModule } from './supplier/supplier.module';
+import { RequestModule } from './request/request.module';
+import { Request } from './request/request.entity';
+import { RequestItemModule } from './request-item/request-item.module';
+import { RequestItem } from './request-item/request-item.entity';
 
 @Module({
   imports: [
@@ -25,8 +29,8 @@ import { SupplierModule } from './supplier/supplier.module';
         username: configService.get('DB_USER', 'root'),
         password: configService.get('DB_PASSWORD', 'rootroot'),
         database: configService.get('DB_NAME', 'SGC'),
-        entities: [User, Item, Supplier],
-        synchronize: true,
+        entities: [User, Item, Supplier, Request, RequestItem],
+        synchronize: false,
       }),
       inject: [ConfigService],
     }),
@@ -34,6 +38,8 @@ import { SupplierModule } from './supplier/supplier.module';
     UserModule,
     ItemModule,
     SupplierModule,
+    RequestModule,
+    RequestItemModule,
   ],
   controllers: [AppController],
   providers: [AppService],

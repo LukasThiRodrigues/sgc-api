@@ -1,6 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
 import { IsEnum, IsNotEmpty } from 'class-validator';
-import { User } from 'src/user/user.entity';
 
 export enum SupplierStatus {
     Invited = 'invited',
