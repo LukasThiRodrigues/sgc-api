@@ -14,6 +14,12 @@ import { RequestModule } from './request/request.module';
 import { Request } from './request/request.entity';
 import { RequestItemModule } from './request-item/request-item.module';
 import { RequestItem } from './request-item/request-item.entity';
+import { Quotation } from './quotation/quotation.entity';
+import { QuotationItem } from './quotation-item/quotation-item.entity';
+import { QuotationSupplier } from './quotation-supplier/quotation-supplier.entity';
+import { QuotationModule } from './quotation/quotation.module';
+import { QuotationItemModule } from './quotation-item/quotation-item.module';
+import { QuotationSupplierModule } from './quotation-supplier/quotation-supplier.module';
 
 @Module({
   imports: [
@@ -29,7 +35,7 @@ import { RequestItem } from './request-item/request-item.entity';
         username: configService.get('DB_USER', 'root'),
         password: configService.get('DB_PASSWORD', 'rootroot'),
         database: configService.get('DB_NAME', 'SGC'),
-        entities: [User, Item, Supplier, Request, RequestItem],
+        entities: [User, Item, Supplier, Request, RequestItem, Quotation, QuotationItem, QuotationSupplier],
         synchronize: false,
       }),
       inject: [ConfigService],
@@ -40,6 +46,9 @@ import { RequestItem } from './request-item/request-item.entity';
     SupplierModule,
     RequestModule,
     RequestItemModule,
+    QuotationModule,
+    QuotationItemModule,
+    QuotationSupplierModule,
   ],
   controllers: [AppController],
   providers: [AppService],
