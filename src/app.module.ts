@@ -20,6 +20,10 @@ import { QuotationSupplier } from './quotation-supplier/quotation-supplier.entit
 import { QuotationModule } from './quotation/quotation.module';
 import { QuotationItemModule } from './quotation-item/quotation-item.module';
 import { QuotationSupplierModule } from './quotation-supplier/quotation-supplier.module';
+import { ProposalItemModule } from './proposal-item/proposal-item.module';
+import { Proposal } from './proposal/proposal.entity';
+import { ProposalItem } from './proposal-item/proposal-item.entity';
+import { ProposalModule } from './proposal/proposal.module';
 
 @Module({
   imports: [
@@ -35,7 +39,7 @@ import { QuotationSupplierModule } from './quotation-supplier/quotation-supplier
         username: configService.get('DB_USER', 'root'),
         password: configService.get('DB_PASSWORD', 'rootroot'),
         database: configService.get('DB_NAME', 'SGC'),
-        entities: [User, Item, Supplier, Request, RequestItem, Quotation, QuotationItem, QuotationSupplier],
+        entities: [User, Item, Supplier, Request, RequestItem, Quotation, QuotationItem, QuotationSupplier, Proposal, ProposalItem],
         synchronize: false,
       }),
       inject: [ConfigService],
@@ -49,6 +53,8 @@ import { QuotationSupplierModule } from './quotation-supplier/quotation-supplier
     QuotationModule,
     QuotationItemModule,
     QuotationSupplierModule,
+    ProposalModule,
+    ProposalItemModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -8,9 +8,10 @@ import { ItemModule } from 'src/item/item.module';
 import { QuotationItemModule } from 'src/quotation-item/quotation-item.module';
 import { QuotationSupplierModule } from 'src/quotation-supplier/quotation-supplier.module';
 import { SupplierModule } from 'src/supplier/supplier.module';
+import { ProposalModule } from 'src/proposal/proposal.module';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Quotation]), QuotationItemModule, QuotationSupplierModule, UserModule, ItemModule, SupplierModule],
+    imports: [TypeOrmModule.forFeature([Quotation]), QuotationItemModule, QuotationSupplierModule, UserModule, ItemModule, SupplierModule, ProposalModule],
     providers: [QuotationService],
     controllers: [QuotationController],
     exports: [QuotationService, TypeOrmModule],

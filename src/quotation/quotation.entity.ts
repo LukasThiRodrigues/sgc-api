@@ -1,9 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToMany } from 'typeorm';
 import { ArrayMaxSize, IsEnum, IsNotEmpty, IsNumber } from 'class-validator';
 import { Type } from 'class-transformer';
 import { User } from 'src/user/user.entity';
 import { QuotationItem } from 'src/quotation-item/quotation-item.entity';
 import { QuotationSupplier } from 'src/quotation-supplier/quotation-supplier.entity';
+import { Proposal } from 'src/proposal/proposal.entity';
 
 export enum QuotationStatus {
     Pending = 'pending',
@@ -32,7 +33,7 @@ export class Quotation {
     @IsEnum(QuotationStatus)
     status: QuotationStatus;
 
-    @Column({type: 'double'})
+    @Column({ type: 'double' })
     @IsNumber()
     total: number;
 
@@ -47,7 +48,12 @@ export class Quotation {
     @Type(() => QuotationItem)
     itens: QuotationItem[];
 
-    @ArrayMaxSize(1500)
+    @OneToMany(() => QuotationSupplier, supplier => supplier.quotation, { cascade: true })
     @Type(() => QuotationSupplier)
     suppliers: QuotationSupplier[];
+
+    @ArrayMaxSize(1500)
+    @Type(() => Proposal)
+    proposals: Proposal[];
+
 }

@@ -11,7 +11,7 @@ export class RequestItemService {
   ) { }
 
   async create(body: RequestItem): Promise<RequestItem> {
-    body.itemId = body.item.id;
+    body.itemId = body.item?.id ? body.item.id : body.itemId;
 
     const requestItem = this.requestItemRepository.create(body);
 
