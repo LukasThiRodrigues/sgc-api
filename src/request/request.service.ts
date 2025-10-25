@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like } from 'typeorm';
-import { Request } from './request.entity';
+import { Repository, Like, Not, In } from 'typeorm';
+import { Request, RequestStatus } from './request.entity';
 import { RequestItemService } from 'src/request-item/request-item.service';
 import { UserService } from 'src/user/user.service';
 import { SupplierService } from 'src/supplier/supplier.service';
@@ -22,6 +22,25 @@ export class RequestService {
     body.creatorId = body.creator.id;
     body.supplierId = body.supplier.id;
 
+    if (!body.code) {
+      const lastRequest = await this.requestRepository
+        .createQueryBuilder('request')
+        .select('request.code')
+        .orderBy('request.code', 'DESC')
+        .getOne();
+
+      let nextCode = 1;
+
+      if (lastRequest && lastRequest.code) {
+        const lastCodeNumber = parseInt(lastRequest.code, 10);
+        if (!isNaN(lastCodeNumber)) {
+          nextCode = lastCodeNumber + 1;
+        }
+      }
+
+      body.code = String(nextCode);
+    }
+
     const existingCode = await this.findByCode(body.code);
 
     if (existingCode) {
@@ -41,14 +60,23 @@ export class RequestService {
     return request;
   }
 
-  async findAll(page: number = 1, limit: number = 10, search?: string): Promise<{ requests: Request[]; total: number }> {
+  async findAll(page: number = 1, limit: number = 10, search?: string, supplierId?: number): Promise<{ requests: Request[]; total: number }> {
     const skip = (page - 1) * limit;
-    const where = search
+    let where;
+
+    where = search
       ? [
         { code: Like(`%${search}%`) },
         { description: Like(`%${search}%`) },
       ]
       : {};
+
+    if (supplierId) {
+      where = {
+        status: Not(In([RequestStatus.Canceled, RequestStatus.Draft])),
+        supplierId
+      }
+    }
 
     const [requests, total] = await this.requestRepository.findAndCount({
       where,

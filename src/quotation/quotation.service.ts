@@ -1,12 +1,13 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like } from 'typeorm';
-import { Quotation } from './quotation.entity';
+import { Repository, Like, Not, In } from 'typeorm';
+import { Quotation, QuotationStatus } from './quotation.entity';
 import { UserService } from 'src/user/user.service';
 import { ItemService } from 'src/item/item.service';
 import { QuotationItemService } from 'src/quotation-item/quotation-item.service';
 import { QuotationSupplierService } from 'src/quotation-supplier/quotation-supplier.service';
 import { SupplierService } from 'src/supplier/supplier.service';
+import { ProposalService } from 'src/proposal/proposal.service';
 
 @Injectable()
 export class QuotationService {
@@ -18,6 +19,7 @@ export class QuotationService {
     private userService: UserService,
     private itemService: ItemService,
     private supplierService: SupplierService,
+    private proposalService: ProposalService,
   ) { }
 
   async create(body: Quotation): Promise<Quotation> {
@@ -48,21 +50,27 @@ export class QuotationService {
     return quotation;
   }
 
-  async findAll(page: number = 1, limit: number = 10, search?: string): Promise<{ quotations: Quotation[]; total: number }> {
+  async findAll(page: number = 1, limit: number = 10, search?: string, supplierId?: number): Promise<{ quotations: Quotation[]; total: number }> {
     const skip = (page - 1) * limit;
-    const where = search
-      ? [
-        { code: Like(`%${search}%`) },
-        { description: Like(`%${search}%`) },
-      ]
-      : {};
+    const query = this.quotationRepository
+      .createQueryBuilder('quotation')
+      .leftJoinAndSelect('quotation.suppliers', 'supplier')
+      .where('quotation.status NOT IN (:...excluded)', { excluded: [QuotationStatus.Canceled, QuotationStatus.Draft] })
+      .orderBy('quotation.createdAt', 'DESC')
+      .skip(skip)
+      .take(limit);
 
-    const [quotations, total] = await this.quotationRepository.findAndCount({
-      where,
-      skip,
-      take: limit,
-      order: { createdAt: 'DESC' },
-    });
+    if (search) {
+      query.andWhere('(quotation.code LIKE :search OR quotation.description LIKE :search)', {
+        search: `%${search}%`
+      });
+    }
+
+    if (supplierId) {
+      query.andWhere('supplier.supplierId = :supplierId', { supplierId });
+    }
+
+    const [quotations, total] = await query.getManyAndCount();
 
     for (const quotation of quotations) {
       quotation.creator = await this.userService.findById(quotation.creatorId);
@@ -85,6 +93,7 @@ export class QuotationService {
     quotation.creator = await this.userService.findById(quotation.creatorId);
     quotation.itens = await this.quotationItemService.findByQuotationId(quotation.id);
     quotation.suppliers = await this.quotationSupplierService.findByQuotationId(quotation.id);
+    quotation.proposals = await this.proposalService.findByQuotationId(quotation.id);
 
     for (const quotationItem of quotation.itens) {
       quotationItem.item = await this.itemService.findById(quotationItem.itemId);

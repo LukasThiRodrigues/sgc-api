@@ -24,8 +24,8 @@ export class RequestController {
     }
 
     @Get()
-    findAll(@Query('page') page: number = 1, @Query('limit') limit: number = 10, @Query('search') search?: string) {
-        return this.requestService.findAll(page, limit, search);
+    findAll(@Query('page') page: number = 1, @Query('limit') limit: number = 10, @Query('search') search?: string, @Query('supplierId') supplierId?: number) {
+        return this.requestService.findAll(page, limit, search, supplierId);
     }
 
     @Get(':id')
