@@ -6,6 +6,7 @@ import { RequestItemService } from 'src/request-item/request-item.service';
 import { UserService } from 'src/user/user.service';
 import { SupplierService } from 'src/supplier/supplier.service';
 import { ItemService } from 'src/item/item.service';
+import { QuotationService } from 'src/quotation/quotation.service';
 
 @Injectable()
 export class RequestService {
@@ -16,6 +17,7 @@ export class RequestService {
     private userService: UserService,
     private supplierService: SupplierService,
     private itemService: ItemService,
+    private quotationService: QuotationService,
   ) { }
 
   async create(body: Request): Promise<Request> {
@@ -108,6 +110,10 @@ export class RequestService {
     request.supplier = await this.supplierService.findById(request.supplierId);
     request.itens = await this.requestItemService.findByRequestId(request.id);
 
+    if (request.quotationId) {
+      request.quotation = await this.quotationService.findById(request.quotationId);
+    }
+
     for (const requestItem of request.itens) {
       requestItem.item = await this.itemService.findById(requestItem.itemId);
     }
@@ -128,6 +134,10 @@ export class RequestService {
 
     if (body.itens) {
       delete (body as any).itens;
+    }
+
+    if (body.quotation) {
+      delete (body as any).quotation;
     }
 
     await this.requestRepository.update(id, body);
