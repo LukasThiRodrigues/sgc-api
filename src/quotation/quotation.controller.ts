@@ -6,11 +6,14 @@ import {
     Param,
     Delete,
     Query,
-    Put
+    Put,
+    UseGuards,
+    Request as RequestCommon
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { QuotationService } from './quotation.service';
 import { Quotation } from './quotation.entity';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @ApiTags('quotations')
 @ApiBearerAuth()
@@ -23,9 +26,10 @@ export class QuotationController {
         return this.quotationService.create(body);
     }
 
+    @UseGuards(JwtAuthGuard)
     @Get()
-    findAll(@Query('page') page: number = 1, @Query('limit') limit: number = 10, @Query('search') search?: string, @Query('supplierId') supplierId?: number) {
-        return this.quotationService.findAll(page, limit, search, supplierId);
+    findAll(@Query('page') page: number = 1, @Query('limit') limit: number = 10, @Query('search') search?: string, @Query('supplierId') supplierId?: number, @RequestCommon() req?) {
+        return this.quotationService.findAll(page, limit, search, supplierId, req.user.userId);
     }
 
     @Get(':id')

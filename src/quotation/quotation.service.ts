@@ -50,7 +50,7 @@ export class QuotationService {
     return quotation;
   }
 
-  async findAll(page: number = 1, limit: number = 10, search?: string, supplierId?: number): Promise<{ quotations: Quotation[]; total: number }> {
+  async findAll(page: number = 1, limit: number = 10, search?: string, supplierId?: number, userId?: number): Promise<{ quotations: Quotation[]; total: number }> {
     const skip = (page - 1) * limit;
     const query = this.quotationRepository
       .createQueryBuilder('quotation')
@@ -68,6 +68,10 @@ export class QuotationService {
 
     if (supplierId) {
       query.andWhere('supplier.supplierId = :supplierId', { supplierId });
+    }
+
+    if (userId && !supplierId) {
+      query.andWhere('quotation.creatorId = :creatorId', { creatorId: userId });
     }
 
     const [quotations, total] = await query.getManyAndCount();

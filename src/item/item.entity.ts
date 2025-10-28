@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
-import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, IsNumber } from 'class-validator';
+import { User } from 'src/user/user.entity';
 
 @Entity('items')
 export class Item {
@@ -21,5 +22,12 @@ export class Item {
 
     @Column({ length: 100 })
     unit: string;
+
+    @IsNotEmpty()
+    creator: User;
+
+    @Column()
+    @IsNumber()
+    creatorId: number;
 
 }

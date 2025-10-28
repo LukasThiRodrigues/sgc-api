@@ -6,11 +6,14 @@ import {
     Param,
     Delete,
     Query,
-    Put
+    Put,
+    UseGuards,
+    Request as RequestCommon
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { SupplierService } from './supplier.service';
 import { Supplier } from './supplier.entity';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @ApiTags('suppliers')
 @ApiBearerAuth()
@@ -23,9 +26,10 @@ export class SupplierController {
         return this.supplierService.create(body);
     }
 
+    @UseGuards(JwtAuthGuard)
     @Get()
-    findAll(@Query('page') page: number = 1, @Query('limit') limit: number = 10, @Query('search') search?: string) {
-        return this.supplierService.findAll(page, limit, search);
+    findAll(@Query('page') page: number = 1, @Query('limit') limit: number = 10, @Query('search') search?: string,  @RequestCommon() req?) {
+        return this.supplierService.findAll(page, limit, search, req.user.userId);
     }
 
     @Get(':id')

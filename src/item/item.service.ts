@@ -11,6 +11,8 @@ export class ItemService {
   ) { }
 
   async create(body: Item): Promise<Item> {
+    body.creatorId = body.creator.id;
+
     const existingCode = await this.findByCode(body.code);
 
     if (existingCode) {
@@ -22,22 +24,26 @@ export class ItemService {
     return await this.itemRepository.save(item);
   }
 
-  async findAll(page: number = 1, limit: number = 10, search?: string): Promise<{ items: Item[]; total: number }> {
+  async findAll(page: number = 1, limit: number = 10, search?: string, userId?: number): Promise<{ items: Item[]; total: number }> {
     const skip = (page - 1) * limit;
-    const where = search
-      ? [
-        { item: Like(`%${search}%`) },
-        { description: Like(`%${search}%`) },
-        { code: Like(`%${search}%`) }
-      ]
-      : {};
+    const query = this.itemRepository
+      .createQueryBuilder('item')
+      .orderBy('item.createdAt', 'DESC')
+      .skip(skip)
+      .take(limit);
 
-    const [items, total] = await this.itemRepository.findAndCount({
-      where,
-      skip,
-      take: limit,
-      order: { createdAt: 'DESC' },
-    });
+    if (search) {
+      query.andWhere(
+        '(item.item LIKE :search OR item.description LIKE :search OR item.code LIKE :search)',
+        { search: `%${search}%` },
+      );
+    }
+
+    if (userId) {
+      query.andWhere('item.creatorId = :userId', { userId });
+    }
+
+    const [items, total] = await query.getManyAndCount();
 
     return { items, total };
   }

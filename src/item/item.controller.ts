@@ -7,7 +7,8 @@ import {
     Delete,
     UseGuards,
     Query,
-    Put
+    Put,
+    Request as RequestCommon
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
@@ -25,9 +26,10 @@ export class ItemController {
         return this.itemService.create(body);
     }
 
+    @UseGuards(JwtAuthGuard)
     @Get()
-    findAll(@Query('page') page: number = 1, @Query('limit') limit: number = 10, @Query('search') search?: string) {
-        return this.itemService.findAll(page, limit, search);
+    findAll(@Query('page') page: number = 1, @Query('limit') limit: number = 10, @Query('search') search?: string, @RequestCommon() req?) {
+        return this.itemService.findAll(page, limit, search, req.user.userId);
     }
 
     @Get(':id')
