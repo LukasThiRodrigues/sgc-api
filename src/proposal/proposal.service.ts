@@ -5,12 +5,15 @@ import { Proposal } from './proposal.entity';
 import { ItemService } from 'src/item/item.service';
 import { SupplierService } from 'src/supplier/supplier.service';
 import { ProposalItemService } from 'src/proposal-item/proposal-item.service';
+import { Request } from 'src/request/request.entity';
 
 @Injectable()
 export class ProposalService {
   constructor(
     @InjectRepository(Proposal)
     private proposalRepository: Repository<Proposal>,
+    @InjectRepository(Request)
+    private readonly requestRepository: Repository<Request>,
     private proposalItemService: ProposalItemService,
     private itemService: ItemService,
     private supplierService: SupplierService,
@@ -83,6 +86,16 @@ export class ProposalService {
     for (const proposal of proposals) {
       proposal.supplier = await this.supplierService.findById(proposal.supplierId);
       proposal.itens = await this.proposalItemService.findByProposalId(proposal.id);
+
+      const request = await this.requestRepository.findOne({
+        where: {
+          proposalId: proposal.id
+        }
+      });
+
+      if (request) {
+        proposal.request = request;
+      }
 
       for (const proposalItem of proposal.itens) {
         proposalItem.item = await this.itemService.findById(proposalItem.itemId);

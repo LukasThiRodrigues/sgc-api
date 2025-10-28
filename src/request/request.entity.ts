@@ -31,7 +31,7 @@ export class Request {
     @Column({ length: 255, nullable: true })
     description: string;
 
-    @CreateDateColumn({ nullable: true })
+    @Column({ type: 'timestamp', nullable: true })
     @IsOptional()
     deliveredAt: Date;
 
