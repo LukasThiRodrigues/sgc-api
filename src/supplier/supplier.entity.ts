@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
-import { IsEnum, IsNotEmpty } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsNumber } from 'class-validator';
+import { User } from 'src/user/user.entity';
 
 export enum SupplierStatus {
     Invited = 'invited',
@@ -28,5 +29,12 @@ export class Supplier {
 
     @Column({ length: 100 })
     contactEmail: string;
+
+    @IsNotEmpty()
+    creator: User;
+
+    @Column()
+    @IsNumber()
+    creatorId: number;
 
 }

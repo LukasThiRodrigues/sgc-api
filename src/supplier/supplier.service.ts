@@ -11,6 +11,8 @@ export class SupplierService {
   ) { }
 
   async create(body: Supplier): Promise<Supplier> {
+    body.creatorId = body.creator.id;
+
     const existingCnpj = await this.findByCnpj(body.cnpj);
 
     if (existingCnpj) {
@@ -22,21 +24,25 @@ export class SupplierService {
     return await this.supplierRepository.save(supplier);
   }
 
-  async findAll(page: number = 1, limit: number = 10, search?: string): Promise<{ suppliers: Supplier[]; total: number }> {
+  async findAll(page: number = 1, limit: number = 10, search?: string, userId?: number): Promise<{ suppliers: Supplier[]; total: number }> {
     const skip = (page - 1) * limit;
-    const where = search
-      ? [
-        { cnpj: Like(`%${search}%`) },
-        { name: Like(`%${search}%`) },
-      ]
-      : {};
+    const query = this.supplierRepository
+      .createQueryBuilder('supplier')
+      .orderBy('supplier.createdAt', 'DESC')
+      .skip(skip)
+      .take(limit);
 
-    const [suppliers, total] = await this.supplierRepository.findAndCount({
-      where,
-      skip,
-      take: limit,
-      order: { createdAt: 'DESC' },
-    });
+    if (search) {
+      query.andWhere('(supplier.name LIKE :search OR supplier.cnpj LIKE :search)', {
+        search: `%${search}%`,
+      });
+    }
+
+    if (userId) {
+      query.andWhere('supplier.creatorId = :userId', { userId });
+    }
+
+    const [suppliers, total] = await query.getManyAndCount();
 
     return { suppliers: suppliers, total };
   }

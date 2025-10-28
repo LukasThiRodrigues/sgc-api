@@ -62,30 +62,32 @@ export class RequestService {
     return request;
   }
 
-  async findAll(page: number = 1, limit: number = 10, search?: string, supplierId?: number): Promise<{ requests: Request[]; total: number }> {
+  async findAll(page: number = 1, limit: number = 10, search?: string, supplierId?: number, userId?: number): Promise<{ requests: Request[]; total: number }> {
     const skip = (page - 1) * limit;
-    let where;
+    const query = this.requestRepository
+      .createQueryBuilder('request')
+      .orderBy('request.createdAt', 'DESC')
+      .skip(skip)
+      .take(limit);
 
-    where = search
-      ? [
-        { code: Like(`%${search}%`) },
-        { description: Like(`%${search}%`) },
-      ]
-      : {};
-
-    if (supplierId) {
-      where = {
-        status: Not(In([RequestStatus.Canceled, RequestStatus.Draft])),
-        supplierId
-      }
+    if (search) {
+      query.andWhere('(request.code LIKE :search OR request.description LIKE :search)', {
+        search: `%${search}%`,
+      });
     }
 
-    const [requests, total] = await this.requestRepository.findAndCount({
-      where,
-      skip,
-      take: limit,
-      order: { createdAt: 'DESC' },
-    });
+    if (supplierId) {
+      query.andWhere('request.supplierId = :supplierId', { supplierId });
+      query.andWhere('request.status NOT IN (:...excludedStatuses)', {
+        excludedStatuses: [RequestStatus.Canceled, RequestStatus.Draft],
+      });
+    }
+
+    if (userId && !supplierId) {
+      query.andWhere('request.creatorId = :userId', { userId });
+    }
+
+    const [requests, total] = await query.getManyAndCount();
 
     for (const request of requests) {
       request.creator = await this.userService.findById(request.creatorId);
