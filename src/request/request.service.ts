@@ -66,7 +66,7 @@ export class RequestService {
     const skip = (page - 1) * limit;
     const query = this.requestRepository
       .createQueryBuilder('request')
-      .orderBy('request.createdAt', 'DESC')
+      .orderBy('request.id', 'DESC')
       .skip(skip)
       .take(limit);
 

@@ -48,7 +48,7 @@ export class Quotation {
     @Type(() => QuotationItem)
     itens: QuotationItem[];
 
-    @OneToMany(() => QuotationSupplier, supplier => supplier.quotation, { cascade: true })
+    @OneToMany(() => QuotationSupplier, supplier => supplier.quotation)
     @Type(() => QuotationSupplier)
     suppliers: QuotationSupplier[];
 

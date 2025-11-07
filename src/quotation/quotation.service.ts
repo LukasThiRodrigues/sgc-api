@@ -56,7 +56,7 @@ export class QuotationService {
       .createQueryBuilder('quotation')
       .leftJoinAndSelect('quotation.suppliers', 'supplier')
       .where('quotation.status NOT IN (:...excluded)', { excluded: [QuotationStatus.Canceled, QuotationStatus.Draft] })
-      .orderBy('quotation.createdAt', 'DESC')
+      .orderBy('quotation.id', 'DESC')
       .skip(skip)
       .take(limit);
 
