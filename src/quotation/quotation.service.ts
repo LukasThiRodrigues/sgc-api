@@ -124,6 +124,10 @@ export class QuotationService {
       delete (body as any).suppliers;
     }
 
+    if (body.proposals) {
+      delete (body as any).proposals;
+    }
+
     await this.quotationRepository.update(id, body);
 
     return this.findById(id);
